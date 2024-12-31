@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Year Wishes</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #ff7eb3, #ff758c);
+            color: #fff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 20px 0;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #ff4477;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .fireworks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .image-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 50%;
+            animation: slideIn 1.5s ease-in-out;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .quote {
+            display: none;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .countdown {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <audio id="backgroundMusic" loop>
+        <source src="Assests/video1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="container">
+        <h1>🎉 Happy New Year! 🎉</h1>
+        <p id="countdown" class="countdown">Get Ready...</p>
+        <p>Wishing you a year full of happiness, success, and unforgettable memories!</p>
+        <button class="btn" onclick="celebrate()">Celebrate</button>
+        <button class="btn" onclick="toggleMusic()">Toggle Music</button>
+        <div class="image-container" id="imageContainer">
+            <img id="currentImage" src="https://via.placeholder.com/400x400?text=Friend1" alt="Friend 1">
+        </div>
+        <div class="quote" id="quote"></div>
+    </div>
+    <div class="fireworks">
+        <canvas id="fireworksCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        const imageContainer = document.getElementById('imageContainer');
+        const currentImage = document.getElementById('currentImage');
+        const quoteElement = document.getElementById('quote');
+        const countdownElement = document.getElementById('countdown');
+        const audio = document.getElementById('backgroundMusic');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const imagesAndQuotes = [
+            { src: 'Assests/img1.jpeg', quote: 'Cheers to another year of friendship!' },
+            { src: 'Assests/img2.jpeg', quote: 'May this year bring joy and laughter!' },
+            { src: 'Assests/img3.jpeg', quote: 'Together, we make unforgettable memories.' },
+            { src: 'Assests/img4.jpeg', quote: '2024: A year to dream big!' },
+           
+        ];
+
+        let currentIndex = 0;
+        let particles = [];
+        let musicPlaying = false;
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 4 - 2;
+                this.speedY = Math.random() * 4 - 2;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.size -= 0.05;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function createParticles(x, y) {
+            const colors = ['#ff6f61', '#ffa07a', '#fff176', '#ff8a80', '#c5e1a5'];
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.size > 0);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        function showFireworks() {
+            canvas.addEventListener('click', (e) => {
+                createParticles(e.clientX, e.clientY);
+            });
+
+            setInterval(() => {
+                createParticles(Math.random() * canvas.width, Math.random() * canvas.height);
+            }, 500);
+
+            animateParticles();
+        }
+
+        function changeImageAndQuote() {
+            currentIndex = (currentIndex + 1) % imagesAndQuotes.length;
+            const { src, quote } = imagesAndQuotes[currentIndex];
+            currentImage.src = src;
+            quoteElement.textContent = quote;
+            quoteElement.style.display = 'block';
+        }
+
+        function startCountdown(callback) {
+            let seconds = 5;
+            countdownElement.textContent = `Starting in ${seconds}...`;
+            const interval = setInterval(() => {
+                seconds -= 1;
+                if (seconds > 0) {
+                    countdownElement.textContent = `Starting in ${seconds}...`;
+                } else {
+                    clearInterval(interval);
+                    countdownElement.textContent = '';
+                    callback();
+                }
+            }, 1000);
+        }
+
+        function toggleMusic() {
+            if (musicPlaying) {
+                audio.pause();
+            } else {
+                audio.play();
+            }
+            musicPlaying = !musicPlaying;
+        }
+
+        function celebrate() {
+            startCountdown(() => {
+                imageContainer.style.display = 'block';
+                quoteElement.style.display = 'block';
+                showFireworks();
+                changeImageAndQuote();
+                setInterval(changeImageAndQuote, 4000);
+                if (!musicPlaying) toggleMusic();
+            });
+        }
+    </script>
+</body>
+</html>
